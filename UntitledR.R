@@ -91,7 +91,7 @@ if (FALSE) {
 
 ################################################################################
 # plot something ?
-freq(sim$landscape$age) # this is not a great example (do better)
+freq(simOut$landscape$age) # this is not a great example (do better)
 ################################################################################
 
 ################################################################################

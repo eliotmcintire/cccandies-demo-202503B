@@ -1,0 +1,6 @@
+[submodule "modules/spades_ws3_dataInit"]
+	path = modules/spades_ws3_dataInit
+	url = https://github.com/PredictiveEcology/spades_ws3_dataInit
+[submodule "modules/spades_ws3"]
+	path = modules/spades_ws3
+	url = https://github.com/PredictiveEcology/spades_ws3
