@@ -61,6 +61,20 @@ out <- SpaDES.project::setupProject(
   require = "SpaDES.core"
 )
 
+bogusFireModule <- "bogus_fire"
+if (bogusFireModule %in% out$modules) {
+  if (!file.exists(file.path(out$paths$modulePath, bogusFireModule, paste0(bogusFireModule, ".R")))) {
+    dataTarGz <- "/srv/shared-data/bogus_fire.tar.gz"
+    if (!dir.exists(dirname(dataTarGz)))
+      stop("This module currently only works with untarred data from:\n", basename(dataTarGz))
+    localTarGz <- file.path(out$paths$modulePath, basename(dataTarGz))
+    file.copy(dataTarGz, localTarGz)
+    untar(localTarGz, exdir = paste0(out$paths$modulePath, "/"))
+    unlink(localTarGz, force = TRUE)
+  }
+}
+
+
 simOut <- do.call(SpaDES.core::simInitAndSpades, out)
 ################################################################################
 if (FALSE) {
