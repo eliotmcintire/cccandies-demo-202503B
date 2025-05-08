@@ -66,7 +66,7 @@ Init <- function(sim) {
 }
 ### Save events
 Save <- function(sim) {
-  
+
   sim <- saveFiles(sim)
   return(invisible(sim))
 }
@@ -79,46 +79,46 @@ plotFun <- function(sim) {
 
 ###  applyFire
 applyFire <- function(sim) {
-  
+
   if (is.null(sim$landscape)) {
     stop("Landscape object is not available.")
   }
-  
+
   # Ensure that the landscape has an 'age' layer
   if ("age" %in% names(sim$landscape)) {
     # Retrieve the pct_to_zero parameter
     p.to.zero <- P(sim)$p.to.zero
     print(p.to.zero)
-    
+
     # Apply pct_to_zero (set a percentage of pixels in 'age' layer to 0)
     #if (!is.null(pct_to_zero) && pct_to_zero > 0 && pct_to_zero <= 1) {
-      
+
       # Get the 'age' layer values
       age.layer.vals <- values(sim$landscape[["age"]])
-      
+
       # Identify non-NA cells
       non.na.cells <- which(!is.na(age.layer.vals))
-      
+
       # Calculate the number of pixels to set to 0
       n.to.zero <- round(p.to.zero * length(non.na.cells))
       print(n.to.zero)
       # Randomly select pixels to set to 0
       set.zero <- sample(non.na.cells, n.to.zero)
-      
+
       # Set the selected pixels to 0 in the 'age' layer
       age.layer.vals[set.zero] <- 0
-      
+
       # Update the 'age' layer
       sim$landscape[["age"]] <- setValues(sim$landscape[["age"]], age.layer.vals)
 
     #} else {
     #  message("No valid pct_to_zero value provided, skipping fire application.")
     #}
-    
+
     # Save the modified landscape
     #message("Saving modified landscape after fire...")
     #writeRaster(landscape, file.path(sim$paths$outputPath, "modified_landscape_with_fire.tif"), overwrite = TRUE)
-    
+
     # Update the sim object
     #sim$modified_landscape <- landscape
   } else {
