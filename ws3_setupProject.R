@@ -2,9 +2,8 @@
 # minimal demo of a working SpaDES model with harvesting (using ws3)
 repos <- c("https://predictiveecology.r-universe.dev", getOption("repos"))
 source("https://raw.githubusercontent.com/PredictiveEcology/pemisc/refs/heads/development/R/getOrUpdatePkg.R")
-# getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9039")) # only install/update if required
-# Require::Install("PredictiveEcology/SpaDES.project@development (HEAD)")
-pkgload::load_all("~/GitHub/Require");pkgload::load_all("~/GitHub/SpaDES.project");
+getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # only install/update if required
+# pkgload::load_all("~/GitHub/SpaDES.project/")
 Require::setLinuxBinaryRepo()
 Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 
@@ -77,7 +76,7 @@ if (bogusFireModule %in% out$modules) {
 
 simOut <- do.call(SpaDES.core::simInitAndSpades, out)
 ################################################################################
-if (FALSE) {
+if (FALSE) { # This was inherited from Greg's old code: it is entirely replaced by above
   # set up SpaDES paths
   setPaths(modulePath = 'modules',
            inputPath = 'input',
