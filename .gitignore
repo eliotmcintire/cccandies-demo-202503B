@@ -13,3 +13,8 @@ output
 .DS_Store
 .quarto
 .venv
+modules/scfmDataPrep
+modules/scfmDiagnostics
+modules/scfmIgnition
+modules/scfmEscape
+modules/scfmSpread

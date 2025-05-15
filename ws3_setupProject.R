@@ -35,8 +35,13 @@ out <- SpaDES.project::setupProject(
   modules = c("PredictiveEcology/spades_ws3_dataInit@main",
               "PredictiveEcology/spades_ws3@dev",
               "ianmseddy/spades_ws3_landrAge@master",
-              "PredictiveEcology/scfm@development")#,
-              #"bogus_fire")
+              "PredictiveEcology/scfm@development/modules/scfmDataPrep",
+              "PredictiveEcology/scfm@development/modules/scfmDiagnostics",
+              "PredictiveEcology/scfm@development/modules/scfmIgnition",
+              "PredictiveEcology/scfm@development/modules/scfmEscape",
+              "PredictiveEcology/scfm@development/modules/scfmSpread"
+  )#,
+  #"bogus_fire")
   ,
   times = list(start = 0, end = 5), # do not modify
   outputs = data.frame(objectName = "landscape"), # do not modify
@@ -61,6 +66,13 @@ out <- SpaDES.project::setupProject(
   packages = c("gert", "SpaDES", "reticulate", "httr"),
   require = "SpaDES.core"
 )
+
+out$modules <- c(grep("scfm", out$modules, invert = TRUE, value = TRUE),
+                 "scfmDataPrep", "scfmDiagnostics",
+                 "scfmIgnition", "scfmEscape", "scfmSpread")
+out$paths$modulePath <- c(out$paths$modulePath, file.path(out$paths$modulePath, "scfm", "modules"))
+
+
 
 bogusFireModule <- "bogus_fire"
 if (bogusFireModule %in% out$modules) {
