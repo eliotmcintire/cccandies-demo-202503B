@@ -25,7 +25,7 @@ shp.path <- "gis/shp"
 ################################################################################
 setwd("~/GitHub2")
 out <- SpaDES.project::setupProject(
-  useGit = TRUE,
+  useGit = "eliotmcintire",
   paths = list(projectPath = "cccandies-demo-202503B",
                modulePath = 'modules',
                inputPath = 'input',
@@ -34,7 +34,9 @@ out <- SpaDES.project::setupProject(
   # overwrite = TRUE, # useGit = "eliotmcintire",
   modules = c("PredictiveEcology/spades_ws3_dataInit@main",
               "PredictiveEcology/spades_ws3@dev",
-              "bogus_fire")
+              "ianmseddy/spades_ws3_landrAge@master",
+              "PredictiveEcology/scfm@development")#,
+              #"bogus_fire")
   ,
   times = list(start = 0, end = 5), # do not modify
   outputs = data.frame(objectName = "landscape"), # do not modify
