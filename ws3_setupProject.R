@@ -12,13 +12,13 @@ Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 base.year <- 2020
 # basenames <- c("tsa08", "tsa16", "tsa24", "tsa40", "tsa41") # data included!
 basenames <- list(c("tsa41")) # only run one TSA as a test (faster and simpler)
-horizon <- 3 # this would typically be one or two rotations (10 or 20 periods)
+horizon <- 20 # this would typically be one or two rotations (10 or 20 periods)
 period_length <- 10 # do not modify this unless you know what you are doing
 # times <- list(start = 0, end = horizon - 1) # do not modify
 tifPath <- "tif" # do not modify (works with included dataset)
 # outputs <-data.frame(objectName = "landscape") # do not modify
-scheduler.mode <- "areacontrol" # self-tuning oldest-first priority queue heuristic algorithm (should "just work")
-# scheduler.mode <- "optimize" # this should also "just work" (needs more testing)
+# scheduler.mode <- "areacontrol" # self-tuning oldest-first priority queue heuristic algorithm (should "just work")
+scheduler.mode <- "optimize" # this should also "just work" (needs more testing)
 target.masks <- list(c('? ? ? ?')) # do not modify
 target.scalefactors <- NULL
 shp.path <- "gis/shp"
@@ -36,7 +36,7 @@ out <- SpaDES.project::setupProject(
               "PredictiveEcology/spades_ws3@dev",
               "bogus_fire")
   ,
-  times = list(start = 0, end = horizon - 1), # do not modify
+  times = list(start = 0, end = 5), # do not modify
   outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(spades_ws3_dataInit = list(basenames = basenames,
                                            tifPath = tifPath,
