@@ -11,8 +11,9 @@ Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 # define local variables (spades_ws3 module parameters)
 base.year <- 2020
 # basenames <- c("tsa08", "tsa16", "tsa24", "tsa40", "tsa41") # data included!
-basenames <- list(c("tsa41")) # only run one TSA as a test (faster and simpler)
-horizon <- 20 # this would typically be one or two rotations (10 or 20 periods)
+
+basenames <- list("tsa41")  # only run one TSA as a test (faster and simpler)
+horizon <- 3 # this would typically be one or two rotations (10 or 20 periods)
 period_length <- 10 # do not modify this unless you know what you are doing
 # times <- list(start = 0, end = horizon - 1) # do not modify
 tifPath <- "tif" # do not modify (works with included dataset)
@@ -22,8 +23,11 @@ scheduler.mode <- "optimize" # this should also "just work" (needs more testing)
 target.masks <- list(c('? ? ? ?')) # do not modify
 target.scalefactors <- NULL
 shp.path <- "gis/shp"
+
+
+
 ################################################################################
-setwd("~/GitHub2")
+# setwd("~/projects")
 out <- SpaDES.project::setupProject(
   useGit = "eliotmcintire",
   paths = list(projectPath = "cccandies-demo-202503B",
@@ -35,15 +39,10 @@ out <- SpaDES.project::setupProject(
   modules = c("PredictiveEcology/spades_ws3_dataInit@main",
               "PredictiveEcology/spades_ws3@dev",
               "ianmseddy/spades_ws3_landrAge@master",
-              "PredictiveEcology/scfm@development/modules/scfmDataPrep",
-              "PredictiveEcology/scfm@development/modules/scfmDiagnostics",
-              "PredictiveEcology/scfm@development/modules/scfmIgnition",
-              "PredictiveEcology/scfm@development/modules/scfmEscape",
-              "PredictiveEcology/scfm@development/modules/scfmSpread"
-  )#,
-  #"bogus_fire")
-  ,
-  times = list(start = 0, end = 5), # do not modify
+              "PredictiveEcology/scfm@development"
+  ),
+  times = list(start = 0, end = 200), # do not modify
+  options = list(spades.allowInitDuringSimInit = TRUE),
   outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(spades_ws3_dataInit = list(basenames = basenames,
                                            tifPath = tifPath,
@@ -53,16 +52,15 @@ out <- SpaDES.project::setupProject(
                                            .saveObjects = c("landscape"),
                                            .savePath = file.path(paths$outputPath, "landscape")),
                 spades_ws3 = list(basenames = basenames,
-                                  horizon = 3,
+                                  horizon = horizon,
                                   period_length = period_length,
                                   tif.path = tifPath,
                                   shp.path = shp.path,
                                   base.year = base.year,
                                   scheduler.mode = scheduler.mode,
                                   target.masks = target.masks,
-                                  target.scalefactors = target.scalefactors),
-                bogus_fire = list(p.to.zero = 0.99))
-  ,
+                                  target.scalefactors = target.scalefactors)
+  ),
   packages = c("gert", "SpaDES", "reticulate", "httr"),
   require = "SpaDES.core"
 )
@@ -70,25 +68,41 @@ out <- SpaDES.project::setupProject(
 out$modules <- c(grep("scfm", out$modules, invert = TRUE, value = TRUE),
                  "scfmDataPrep", "scfmDiagnostics",
                  "scfmIgnition", "scfmEscape", "scfmSpread")
-out$paths$modulePath <- c(out$paths$modulePath, file.path(out$paths$modulePath, "scfm", "modules"))
+out$paths$modulePath <- c("modules", "modules/scfm/modules")
+
+out$loadOrder <- unlist(out$modules)
 
 
-
-bogusFireModule <- "bogus_fire"
-if (bogusFireModule %in% out$modules) {
-  if (!file.exists(file.path(out$paths$modulePath, bogusFireModule, paste0(bogusFireModule, ".R")))) {
-    dataTarGz <- "/srv/shared-data/bogus_fire.tar.gz"
-    if (!dir.exists(dirname(dataTarGz)))
-      stop("This module currently only works with untarred data from:\n", basename(dataTarGz))
-    localTarGz <- file.path(out$paths$modulePath, basename(dataTarGz))
-    file.copy(dataTarGz, localTarGz)
-    untar(localTarGz, exdir = paste0(out$paths$modulePath, "/"))
-    unlink(localTarGz, force = TRUE)
-  }
-}
-
-
+# import pdb; pdb.set_trace() #put this chunk in to debug python
 simOut <- do.call(SpaDES.core::simInitAndSpades, out)
+
+
+
+
+
+# (Pdb) print(df_targets)
+# vcut   abrn  cflw_acut_e  cgen_vcut_e  cgen_abrn_e
+# tsa   year
+# tsa08 2020  1600000  13000         0.05         0.01         0.01
+# tsa16 2020  1800000   1262         0.05         0.01         0.01
+# tsa24 2020  4000000    494         0.05         0.01         0.01
+# tsa40 2020  2000000   1632         0.05         0.01         0.01
+# tsa41 2020  1200000    336         0.05         0.01         0.01
+
+# tsa   year  AAC     per-year    ha/burned/year
+
+
+
+# cflw_acut_e  cgen_vcut_e
+#these are the constraints around the annual area cut expressed as proportions and  +/- in m3/cut/year
+#so cut 336 wit subsequent cuts +/- 5% (or 4 to 6% of that)
+#cgen_abrn_e is a burn constraint
+
+
+
+
+
+
 ################################################################################
 if (FALSE) { # This was inherited from Greg's old code: it is entirely replaced by above
   # set up SpaDES paths
@@ -130,14 +144,14 @@ freq(simOut$landscape$age) # this is not a great example (do better)
 ################################################################################
 # compile some aggregated data tables from raw geotiff spades_ws3 model output
 #years <- 2020:2099
-#burned.area.tsa08 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa08/projected_fire_', x, '.tif')), sum) * 6.25)})
-#burned.area.tsa16 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa16/projected_fire_', x, '.tif')), sum) * 6.25)})
-#burned.area.tsa24 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa24/projected_fire_', x, '.tif')), sum) * 6.25)})
-#burned.area.tsa40 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa40/projected_fire_', x, '.tif')), sum) * 6.25)})
-#burned.area.tsa41 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa41/projected_fire_', x, '.tif')), sum) * 6.25)})
-#harvested.area.tsa08 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa08/projected_harvest_', x, '.tif')), sum) * 6.25)})
-#harvested.area.tsa16 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa16/projected_harvest_', x, '.tif')), sum) * 6.25)})
-#harvested.area.tsa24 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa24/projected_harvest_', x, '.tif')), sum) * 6.25)})
-#harvested.area.tsa40 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa40/projected_harvest_', x, '.tif')), sum) * 6.25)})
-#harvested.area.tsa41 <- sapply(years, function(x){return(cellStats(raster(paste0('input/tif/tsa41/projected_harvest_', x, '.tif')), sum) * 6.25)})
+#burned.area.tsa08 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa08/projected_fire_', x, '.tif')), sum) * 6.25)})
+#burned.area.tsa16 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa16/projected_fire_', x, '.tif')), sum) * 6.25)})
+#burned.area.tsa24 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa24/projected_fire_', x, '.tif')), sum) * 6.25)})
+#burned.area.tsa40 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa40/projected_fire_', x, '.tif')), sum) * 6.25)})
+#burned.area.tsa41 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa41/projected_fire_', x, '.tif')), sum) * 6.25)})
+#harvested.area.tsa08 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa08/projected_harvest_', x, '.tif')), sum) * 6.25)})
+#harvested.area.tsa16 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa16/projected_harvest_', x, '.tif')), sum) * 6.25)})
+#harvested.area.tsa24 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa24/projected_harvest_', x, '.tif')), sum) * 6.25)})
+#harvested.area.tsa40 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa40/projected_harvest_', x, '.tif')), sum) * 6.25)})
+#harvested.area.tsa41 <- sapply(years, function(x){return(cellStats(rast(paste0('input/tif/tsa41/projected_harvest_', x, '.tif')), sum) * 6.25)})
 ################################################################################
