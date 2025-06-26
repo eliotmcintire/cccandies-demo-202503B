@@ -61,8 +61,11 @@ out <- SpaDES.project::setupProject(
                                   target.masks = target.masks,
                                   target.scalefactors = target.scalefactors)
   ),
-  packages = c("gert", "SpaDES", "reticulate", "httr"),
-  require = "SpaDES.core"
+  packages = c("gert", #"SpaDES",
+               "reticulate", "httr",
+               "PredictiveEcology/reproducible@AI"
+               ),
+  require = "PredictiveEcology/SpaDES.core@box"
 )
 
 out$modules <- c(grep("scfm", out$modules, invert = TRUE, value = TRUE),
