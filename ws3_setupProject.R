@@ -43,7 +43,7 @@ out <- SpaDES.project::setupProject(
   ),
   times = list(start = 0, end = 200), # do not modify
   options = list(spades.allowInitDuringSimInit = TRUE),
-  outputs = data.frame(objectName = "landscape"), # do not modify
+  # outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(
     .globals = list(basenames = basenames,
                    tifPath = tifPath,
