@@ -36,12 +36,14 @@ out <- SpaDES.project::setupProject(
                outputPath = 'output',
                cachePath = 'cache'),
   # overwrite = TRUE, # useGit = "eliotmcintire",
-  modules = c("PredictiveEcology/spades_ws3_dataInit@main",
-              "PredictiveEcology/spades_ws3@dev",
-              "ianmseddy/spades_ws3_landrAge@master",
-              "PredictiveEcology/scfm@development"
+  modules = c(
+    "UBC-FRESH/cccandies_demo_input@master", #remove this before sim (until it is a module)
+    "PredictiveEcology/spades_ws3_dataInit@main",
+    "PredictiveEcology/spades_ws3@dev",
+    "ianmseddy/spades_ws3_landrAge@master",
+    "PredictiveEcology/scfm@development"
   ),
-  times = list(start = 0, end = 200), # do not modify
+  times = list(start = 0, end = 20), # do not modify
   options = list(spades.allowInitDuringSimInit = TRUE),
   # outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(
@@ -72,9 +74,22 @@ out <- SpaDES.project::setupProject(
                )
 )
 
-out$modules <- c(grep("scfm", out$modules, invert = TRUE, value = TRUE),
-                 "scfmDataPrep", "scfmDiagnostics",
-                 "scfmIgnition", "scfmEscape", "scfmSpread")
+out$modules <- c(
+  grep("scfm", out$modules, invert = TRUE, value = TRUE),
+  "scfmDataPrep", "scfmDiagnostics",
+  "scfmIgnition", "scfmEscape", "scfmSpread"
+  )
+#this has no R code - it retrieves data from datalad - it could be converted
+#to a module, at which point it should also replace spades_ws3_dataInit
+out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]
+
+if (!dir.exists("modules/cccandies_demo_input/hdt")) {
+  if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
+    #the above could be repeated for tif, gis,
+  system("cd modules/cccandies_demo_input && datalad get input . -r")
+  }
+}
+
 out$paths$modulePath <- c("modules", "modules/scfm/modules")
 
 out$loadOrder <- unlist(out$modules)
