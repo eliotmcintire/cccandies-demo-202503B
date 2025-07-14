@@ -3,7 +3,7 @@
 repos <- c("https://predictiveecology.r-universe.dev", getOption("repos"))
 source("https://raw.githubusercontent.com/PredictiveEcology/pemisc/refs/heads/development/R/getOrUpdatePkg.R")
 getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # only install/update if required
-# pkgload::load_all("~/GitHub/SpaDES.project/")
+
 Require::setLinuxBinaryRepo()
 Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 
@@ -12,18 +12,17 @@ Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 base.year <- 2020
 # basenames <- c("tsa08", "tsa16", "tsa24", "tsa40", "tsa41") # data included!
 
-basenames <- list("tsa41")  # only run one TSA as a test (faster and simpler)
+basenames <- list("tsa41", "tsa40")  # only run one TSA as a test (faster and simpler)
 horizon <- 3 # this would typically be one or two rotations (10 or 20 periods)
 period_length <- 10 # do not modify this unless you know what you are doing
-# times <- list(start = 0, end = horizon - 1) # do not modify
 tifPath <- "tif" # do not modify (works with included dataset)
-# outputs <-data.frame(objectName = "landscape") # do not modify
+
 # scheduler.mode <- "areacontrol" # self-tuning oldest-first priority queue heuristic algorithm (should "just work")
-scheduler.mode <- "areacontrol" # this should also "just work" (needs more testing)
+scheduler.mode <- "optimize" # this should also "just work" (needs more testing)
 target.masks <- list(c('? ? ? ?')) # do not modify
+# target.scalefactors <- py_dict(basenames, list(rep(1.0, times = length(basenames))))
 target.scalefactors <- NULL
 shp.path <- "gis/shp"
-
 
 
 ################################################################################
@@ -43,12 +42,13 @@ out <- SpaDES.project::setupProject(
     "ianmseddy/spades_ws3_landrAge@master",
     "PredictiveEcology/scfm@development"
   ),
-  times = list(start = 0, end = 20), # do not modify
-  options = list(spades.allowInitDuringSimInit = TRUE),
+  times = list(start = 0, end = 99), # do not modify
+  options = list(spades.allowInitDuringSimInit = TRUE), #TODO: is this still required?
   # outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(
     .globals = list(basenames = basenames,
                    tifPath = tifPath,
+                   .plots = "png", #write figures to disk
                    base.year = base.year),
     spades_ws3_dataInit = list(basenames = basenames,
                                tifPath = tifPath,
@@ -65,11 +65,13 @@ out <- SpaDES.project::setupProject(
                       base.year = base.year,
                       scheduler.mode = scheduler.mode,
                       target.masks = target.masks,
-                      target.scalefactors = target.scalefactors)
+                      target.scalefactors = target.scalefactors),
+    scfmDataPrep = list(.useParallelFireRegimePolys = TRUE, #use Greg's cores
+                        targetN = 1000) #unserious fire param during testing
   ),
   packages = c("gert", #"SpaDES",
                "reticulate", "httr",
-               "PredictiveEcology/reproducible@AI",
+               "PredictiveEcology/reproducible@AI (HEAD)",
                "PredictiveEcology/SpaDES.core@box (>= 2.1.5.9005)"
                )
 )
@@ -83,6 +85,7 @@ out$modules <- c(
 #to a module, at which point it should also replace spades_ws3_dataInit
 out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]
 
+#TODO: make this a submodule of dataInit
 if (!dir.exists("modules/cccandies_demo_input/hdt")) {
   if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
     #the above could be repeated for tif, gis,
@@ -96,9 +99,9 @@ out$loadOrder <- unlist(out$modules)
 
 
 # import pdb; pdb.set_trace() #put this chunk in to debug python
+#to update ws3, pip install --upgrade ws3
+#reticulate::import("ws3")$`__version__`
 simOut <- do.call(SpaDES.core::simInitAndSpades, out)
-
-
 
 
 
