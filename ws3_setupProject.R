@@ -71,7 +71,7 @@ out <- SpaDES.project::setupProject(
   ),
   packages = c("gert", #"SpaDES",
                "reticulate", "httr",
-               "PredictiveEcology/reproducible@AI (HEAD)",
+               "PredictiveEcology/reproducible@AI (>= 2.1.2.9056)",
                "PredictiveEcology/SpaDES.core@box (>= 2.1.5.9005)"
                )
 )
