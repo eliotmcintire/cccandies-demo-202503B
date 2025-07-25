@@ -16,3 +16,12 @@
 [submodule "modules/cccandies_demo_input"]
 	path = modules/cccandies_demo_input
 	url = https://github.com/UBC-FRESH/cccandies_demo_input
+[submodule "modules/Biomass_borealDataPrep"]
+	path = modules/Biomass_borealDataPrep
+	url = https://github.com/PredictiveEcology/Biomass_borealDataPrep
+[submodule "modules/Biomass_core"]
+	path = modules/Biomass_core
+	url = https://github.com/PredictiveEcology/Biomass_core
+[submodule "modules/Biomass_regeneration"]
+	path = modules/Biomass_regeneration
+	url = https://github.com/PredictiveEcology/Biomass_regeneration
