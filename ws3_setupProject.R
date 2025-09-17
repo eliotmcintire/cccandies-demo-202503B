@@ -4,18 +4,22 @@ repos <- c("https://predictiveecology.r-universe.dev", getOption("repos"))
 source("https://raw.githubusercontent.com/PredictiveEcology/pemisc/refs/heads/development/R/getOrUpdatePkg.R")
 getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # only install/update if required
 
+# Require::Install("PredictiveEcology/Require@hasHEAD (>=0.1.1.9019)", install = "force")
+# Require::Require("PredictiveEcology/reproducible@AI (HEAD)")
+
 Require::setLinuxBinaryRepo()
+
 Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
 
 ################################################################################
 # define local variables (spades_ws3 module parameters)
 base.year <- 2020
-# basenames <- c("tsa08", "tsa16", "tsa24", "tsa40", "tsa41") # data included!
 
-basenames <- list("tsa41", "tsa40")  # only run one TSA as a test (faster and simpler)
-horizon <- 3 # this would typically be one or two rotations (10 or 20 periods)
+# basenames <- c("tsa08", "tsa16", "tsa24", "tsa40", "tsa41") # data included!
+basenames <- list("tsa41")  # only run one TSA as a test (faster and simpler)
+horizon <- 12 # this would typically be one or two rotations (10 or 20 periods)
 period_length <- 10 # do not modify this unless you know what you are doing
-tifPath <- "tif" # do not modify (works with included dataset)
+tif.path <- "tif" # do not modify (works with included dataset)
 
 # scheduler.mode <- "areacontrol" # self-tuning oldest-first priority queue heuristic algorithm (should "just work")
 scheduler.mode <- "optimize" # this should also "just work" (needs more testing)
@@ -39,69 +43,83 @@ out <- SpaDES.project::setupProject(
     "UBC-FRESH/cccandies_demo_input@master", #remove this before sim (until it is a module)
     "PredictiveEcology/spades_ws3_dataInit@main",
     "PredictiveEcology/spades_ws3@dev",
-    "ianmseddy/spades_ws3_landrAge@master",
-    "PredictiveEcology/scfm@development"
+    "ianmseddy/spades_ws3_landrAge@master"
+    # "PredictiveEcology/scfm@development",
+    # "PredictiveEcology/Biomass_borealDataPrep@development",
+    # "PredictiveEcology/Biomass_core@development",
+    # "PredictiveEcology/Biomass_regeneration@development",
+    # "ianmseddy/LandR_reforestation@master"
   ),
+  require = c("PredictiveEcology/LandR@development"),
   times = list(start = 0, end = 99), # do not modify
   options = list(spades.allowInitDuringSimInit = TRUE), #TODO: is this still required?
   # outputs = data.frame(objectName = "landscape"), # do not modify
   params = list(
-    .globals = list(basenames = basenames,
-                   tifPath = tifPath,
-                   .plots = "png", #write figures to disk
-                   base.year = base.year),
-    spades_ws3_dataInit = list(basenames = basenames,
-                               tifPath = tifPath,
-                               base.year = base.year,
+    .globals = list(
+      .plots = "png", #write figures to disk
+      basenames = basenames, # for LandR_age + ws3
+      tif.path = tif.path, # for LandR_age + ws3
+      base.year = base.year # for LandR_age + ws3
+    ),
+    spades_ws3_dataInit = list(
                                .saveInitialTime = 0,
                                .saveInterval = 1,
                                .saveObjects = c("landscape"),
                                .savePath = file.path(paths$outputPath, "landscape")),
     spades_ws3 = list(basenames = basenames,
                       horizon = horizon,
-                      period_length = period_length,
-                      tif.path = tifPath,
-                      shp.path = shp.path,
+                      enable.debugpy = FALSE,
                       base.year = base.year,
                       scheduler.mode = scheduler.mode,
-                      target.masks = target.masks,
                       target.scalefactors = target.scalefactors),
     scfmDataPrep = list(.useParallelFireRegimePolys = TRUE, #use Greg's cores
                         targetN = 1000) #unserious fire param during testing
   ),
   packages = c("gert", #"SpaDES",
-               "reticulate", "httr",
+               "reticulate", "httr", "RCurl", "XML",
                "PredictiveEcology/reproducible@AI (>= 2.1.2.9056)",
                "PredictiveEcology/SpaDES.core@box (>= 2.1.5.9005)"
-               )
+               ),
+  sppEquiv = {
+    spp <- LandR::sppEquivalencies_CA[LandR %in% c("Pinu_con", "Pinu_ban",
+                                                   "Pice_gla", "Pice_mar",
+                                                   "Pice_eng", "Abie_las",
+                                                   "Popu_tre", "Betu_pap"),]
+    spp <- spp[LANDIS_test != "",]
+    spp
+  }
 )
 
-out$modules <- c(
-  grep("scfm", out$modules, invert = TRUE, value = TRUE),
-  "scfmDataPrep", "scfmDiagnostics",
-  "scfmIgnition", "scfmEscape", "scfmSpread"
-  )
-#this has no R code - it retrieves data from datalad - it could be converted
-#to a module, at which point it should also replace spades_ws3_dataInit
+# fix modules
+# out$modules <- c(
+#   grep("scfm", out$modules, invert = TRUE, value = TRUE),
+#   "scfmDataPrep", "scfmDiagnostics",
+#   "scfmIgnition", "scfmEscape", "scfmSpread"
+#   )
 out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]
 
-#TODO: make this a submodule of dataInit
 if (!dir.exists("modules/cccandies_demo_input/hdt")) {
   if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
     #the above could be repeated for tif, gis,
   system("cd modules/cccandies_demo_input && datalad get input . -r")
   }
 }
-
 out$paths$modulePath <- c("modules", "modules/scfm/modules")
-
 out$loadOrder <- unlist(out$modules)
 
+#TODO: discuss with Greg making candies_demo_ws3 a submodule of spades_ws3_dataPrep
 
 # import pdb; pdb.set_trace() #put this chunk in to debug python
 #to update ws3, pip install --upgrade ws3
 #reticulate::import("ws3")$`__version__`
+
+#TODO: make harvestStats a data.table not a data.frame
+
+
 simOut <- do.call(SpaDES.core::simInitAndSpades, out)
+
+
+
 
 
 
