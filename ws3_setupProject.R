@@ -9,8 +9,10 @@ getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # 
 
 Require::setLinuxBinaryRepo()
 
-Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
-
+# pythonDir <- ".venv/bin/python"
+# dir.create(pythonDir, recursive = TRUE, showWarnings = FALSE)
+# Sys.setenv(RETICULATE_PYTHON=pythonDir)
+setwd("~/GitHub")
 ################################################################################
 # define local variables (spades_ws3 module parameters)
 base.year <- 2020
@@ -62,10 +64,10 @@ out <- SpaDES.project::setupProject(
       base.year = base.year # for LandR_age + ws3
     ),
     spades_ws3_dataInit = list(
-                               .saveInitialTime = 0,
-                               .saveInterval = 1,
-                               .saveObjects = c("landscape"),
-                               .savePath = file.path(paths$outputPath, "landscape")),
+      .saveInitialTime = 0,
+      .saveInterval = 1,
+      .saveObjects = c("landscape"),
+      .savePath = file.path(paths$outputPath, "landscape")),
     spades_ws3 = list(basenames = basenames,
                       horizon = horizon,
                       enable.debugpy = FALSE,
@@ -79,7 +81,7 @@ out <- SpaDES.project::setupProject(
                "reticulate", "httr", "RCurl", "XML",
                "PredictiveEcology/reproducible@AI (>= 2.1.2.9056)",
                "PredictiveEcology/SpaDES.core@box (>= 2.1.5.9005)"
-               ),
+  ),
   sppEquiv = {
     spp <- LandR::sppEquivalencies_CA[LandR %in% c("Pinu_con", "Pinu_ban",
                                                    "Pice_gla", "Pice_mar",
@@ -98,12 +100,12 @@ out <- SpaDES.project::setupProject(
 #   )
 out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]
 
-if (!dir.exists("modules/cccandies_demo_input/hdt")) {
-  if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
-    #the above could be repeated for tif, gis,
+# if (!dir.exists("modules/cccandies_demo_input/hdt")) {
+if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
+  #the above could be repeated for tif, gis,
   system("cd modules/cccandies_demo_input && datalad get input . -r")
-  }
 }
+# }
 out$paths$modulePath <- c("modules", "modules/scfm/modules")
 out$loadOrder <- unlist(out$modules)
 
