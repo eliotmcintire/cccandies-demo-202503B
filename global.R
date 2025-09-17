@@ -85,7 +85,7 @@ out <- SpaDES.project::setupProject(
                                                    "Pice_eng", "Abie_las",
                                                    "Popu_tre", "Betu_pap"),]
     spp <- spp[LANDIS_test != "",]
-    spp
+    spp #change
   }
 )
 
