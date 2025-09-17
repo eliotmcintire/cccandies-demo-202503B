@@ -12,7 +12,7 @@ Require::setLinuxBinaryRepo()
 # pythonDir <- ".venv/bin/python"
 # dir.create(pythonDir, recursive = TRUE, showWarnings = FALSE)
 # Sys.setenv(RETICULATE_PYTHON=pythonDir)
-setwd("~/GitHub")
+# setwd("~/GitHub")
 ################################################################################
 # define local variables (spades_ws3 module parameters)
 base.year <- 2020
