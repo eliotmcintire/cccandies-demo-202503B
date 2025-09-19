@@ -40,7 +40,7 @@ out <- SpaDES.project::setupProject(
                cachePath = 'cache'),
   modules = c(
     "UBC-FRESH/cccandies_demo_input@master", #add this as a submodule to ws3_dataInit
-    "PredictiveEcology/spades_ws3_dataInit@main",
+    "PredictiveEcology/spades_ws3_dataInit@dev",
     "PredictiveEcology/spades_ws3@dev",
     "ianmseddy/spades_ws3_landrAge@master"
     # "PredictiveEcology/scfm@development",
