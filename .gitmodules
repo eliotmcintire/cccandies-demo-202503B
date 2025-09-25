@@ -10,12 +10,6 @@
 [submodule "modules/scfm"]
 	path = modules/scfm
 	url = https://github.com/PredictiveEcology/scfm
-[submodule "modules/cccandies-demo-input"]
-	path = modules/cccandies-demo-input
-	url = https://github.com/UBC-FRESH/cccandies-demo-input
-[submodule "modules/cccandies_demo_input"]
-	path = modules/cccandies_demo_input
-	url = https://github.com/UBC-FRESH/cccandies_demo_input
 [submodule "modules/Biomass_borealDataPrep"]
 	path = modules/Biomass_borealDataPrep
 	url = https://github.com/PredictiveEcology/Biomass_borealDataPrep
