@@ -41,9 +41,7 @@ out <- SpaDES.project::setupProject(
   modules = c(
     #"UBC-FRESH/cccandies_demo_input@master", #add this as a submodule to ws3_dataInit
     "PredictiveEcology/spades_ws3_dataInit@dev",
-    #"PredictiveEcology/spades_ws3@dev",
-    "PredictiveEcology/spades_ws3@PE",
-    #"iammseddy/spades_ws3_landrAge@master"
+    "PredictiveEcology/spades_ws3@dev",
     "AllenLarocque/spades_ws3_landrAge@PE"
     # "PredictiveEcology/scfm@development",
     # "PredictiveEcology/Biomass_borealDataPrep@development",
@@ -81,7 +79,7 @@ out <- SpaDES.project::setupProject(
                "reticulate", "httr", "RCurl", "XML",
                "PredictiveEcology/reproducible@AI (>= 2.1.2.9056)",
                "PredictiveEcology/SpaDES.core@box (>= 2.1.5.9005)"
-               ),
+  ),
   sppEquiv = {
     spp <- LandR::sppEquivalencies_CA[LandR %in% c("Pinu_con", "Pinu_ban",
                                                    "Pice_gla", "Pice_mar",
@@ -98,7 +96,7 @@ out <- SpaDES.project::setupProject(
 #   "scfmDataPrep", "scfmDiagnostics",
 #   "scfmIgnition", "scfmEscape", "scfmSpread"
 #   )
-out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]   # Fix this
+#out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]   # Fix this
 
 #if (!dir.exists("modules/cccandies_demo_input/hdt")) {
 #  if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
@@ -106,8 +104,8 @@ out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TR
 #  system("cd modules/cccandies_demo_input && datalad get input . -r")
 #  }
 #}
-out$paths$modulePath <- c("modules", "modules/scfm/modules")
-out$loadOrder <- unlist(out$modules)
+#out$paths$modulePath <- c("modules", "modules/scfm/modules")
+#out$loadOrder <- unlist(out$modules)
 
 #TODO: discuss with Greg making candies_demo_ws3 a submodule of spades_ws3_dataPrep
 
