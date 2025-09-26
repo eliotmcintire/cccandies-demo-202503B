@@ -61,7 +61,7 @@ out <- SpaDES.project::setupProject(
       base.year = base.year    # for LandR_age + ws3
     ),
     spades_ws3_dataInit = list(
-      GithubURL="git@github.com:UBC-FRESH/cccandies-demo-202503-input.git",
+      GithubURL="git@github.com:UBC-FRESH/cccandies_demo_input.git",
       .saveInitialTime = 0,
       .saveInterval = 1,
       .saveObjects = c("landscape"),
