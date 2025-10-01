@@ -21,9 +21,9 @@ out <- SpaDES.project::setupProject(
   ### Define local variables (spades_ws3 module parameters)
   base.year = 2020,           # first year of harvest planning
   basenames = list("tsa41"),  # the 'basenames' to run the simulation
-  horizon = 12,               # The number of planning periods.
-  period_length = 10,         # The number of years between planning periods. Sept 2025: Greg says 'don't change this unless you know what you are doing'
-  tif.path = "tif",           # do not modify (works with included dataset)
+  horizon = 3,               # The number of planning periods.
+  period_length = 8,         # The number of years between planning periods. Sept 2025: Greg says 'don't change this unless you know what you are doing'
+  tif.path = "tif",           # path to tifs within the input directory
   scheduler.mode = "areacontrol", # currently 'areacontrol' and 'optimize' is implemented
   target.masks = list(c('? ? ? ?')), # do not modify. AL: I don't know what this is
 
