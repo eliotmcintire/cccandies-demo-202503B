@@ -24,7 +24,7 @@ out <- SpaDES.project::setupProject(
   horizon = 3,               # The number of planning periods.
   period_length = 8,         # The number of years between planning periods. Sept 2025: Greg says 'don't change this unless you know what you are doing'
   tif.path = "tif",           # path to tifs within the input directory
-  scheduler.mode = "areacontrol", # currently 'areacontrol' and 'optimize' is implemented
+  scheduler.mode = "optimize", # currently 'areacontrol' and 'optimize' is implemented
   target.masks = list(c('? ? ? ?')), # do not modify. AL: I don't know what this is
 
   target.scalefactors = NULL, # AL: I don't know what this is
