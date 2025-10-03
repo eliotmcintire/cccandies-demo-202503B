@@ -1,5 +1,4 @@
 # minimal demo of a working SpaDES model with harvesting (using ws3)
-# minimal demo of a working SpaDES model with harvesting (using ws3)
 repos <- c("https://predictiveecology.r-universe.dev", getOption("repos"))
 source("https://raw.githubusercontent.com/PredictiveEcology/pemisc/refs/heads/development/R/getOrUpdatePkg.R")
 getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # only install/update if required
@@ -9,27 +8,36 @@ getOrUpdatePkg(c("Require", "SpaDES.project"), c("1.0.1.9003", "0.1.1.9037")) # 
 
 Require::setLinuxBinaryRepo()
 
-#Sys.setenv(RETICULATE_PYTHON=".venv/bin/python")
-
 ################################################################################
 
+# Settings for WS3:
+# Select scheduler mode:
+scheduler.mode <- "optimize"
+scheduler.mode<- "areacontrol"
+
+# decide on target.scalefactors depending on scheduler.mode
+if (scheduler.mode == "optimize") {
+  target.scalefactors <- py_dict(basenames, list(rep(1.0, times = length(basenames))))
+} else if (scheduler.mode == "areacontrol") {
+  target.scalefactors <- NULL
+}
 
 ################################################################################
 # setwd("~/projects")
 out <- SpaDES.project::setupProject(
 
   ### Define local variables (spades_ws3 module parameters)
-  base.year = 2020,           # first year of harvest planning
-  basenames = list("tsa41"),  # the 'basenames' to run the simulation
-  horizon = 3,               # The number of planning periods.
-  period_length = 8,         # The number of years between planning periods. Sept 2025: Greg says 'don't change this unless you know what you are doing'
-  tif.path = "tif",           # path to tifs within the input directory
-  scheduler.mode = "optimize", # currently 'areacontrol' and 'optimize' is implemented
-  target.masks = list(c('? ? ? ?')), # do not modify. AL: I don't know what this is
+  scheduler.mode = scheduler.mode,             # currently 'areacontrol' and 'optimize' is implemented
+  target.scalefactors = target.scalefactors,   # these are different depending on scheduler.mode
 
-  target.scalefactors = NULL, # AL: I don't know what this is
-  # target.scalefactors <- py_dict(basenames, list(rep(1.0, times = length(basenames))))
+  base.year = 2020,           # first year of harvest planning
+  basenames = list("tsa41","tsa40"),  # the 'basenames' to run the simulation
+  horizon = 3,               # The number of planning periods to include in optimization.
+  period_length = 8,         # The number of years between planning periods. Sept 2025: Greg says 'don't change this unless you know what you are doing'
+
   shp.path = "gis/shp",    # path to GIS shape files
+  tif.path = "tif",           # path to tifs within the input directory
+  target.masks = list(c('? ? ? ?')), # do not modify. AL: I don't know what this is
   ###
 
   useGit = "eliotmcintire",
@@ -90,6 +98,21 @@ out <- SpaDES.project::setupProject(
   }
 )
 
+
+simOut <- do.call(SpaDES.core::simInitAndSpades, out)
+
+
+#####
+# Working project notes:
+
+# import pdb; pdb.set_trace() #put this chunk in to debug python
+#to update ws3, pip install --upgrade ws3
+
+# TODO:
+#TODO: make harvestStats a data.table not a data.frame
+
+
+
 # fix modules
 # out$modules <- c(
 #   grep("scfm", out$modules, invert = TRUE, value = TRUE),
@@ -97,28 +120,6 @@ out <- SpaDES.project::setupProject(
 #   "scfmIgnition", "scfmEscape", "scfmSpread"
 #   )
 #out$modules <- out$modules[grep("cccandies_demo_input", out$modules, invert = TRUE)]   # Fix this
-
-#if (!dir.exists("modules/cccandies_demo_input/hdt")) {
-#  if (!length(list.files("modules/cccandies_demo_input/hdt")) > 0) {
-#    #the above could be repeated for tif, gis,
-#  system("cd modules/cccandies_demo_input && datalad get input . -r")
-#  }
-#}
-#out$paths$modulePath <- c("modules", "modules/scfm/modules")
-#out$loadOrder <- unlist(out$modules)
-
-#TODO: discuss with Greg making candies_demo_ws3 a submodule of spades_ws3_dataPrep
-
-# import pdb; pdb.set_trace() #put this chunk in to debug python
-#to update ws3, pip install --upgrade ws3
-#reticulate::import("ws3")$`__version__`
-
-#TODO: make harvestStats a data.table not a data.frame
-
-
-simOut <- do.call(SpaDES.core::simInitAndSpades, out)
-
-
 
 
 
